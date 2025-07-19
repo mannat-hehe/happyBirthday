@@ -88,20 +88,8 @@
       box-shadow: 0 0 20px rgba(0,0,0,0.3);
       text-transform: uppercase;
       animation: popupIn 1s ease-out forwards;
-      background: linear-gradient(135deg, #fff0f5, #ffe4e1);
-      color: #ff69b4;
+      color: hotpink;
       font-weight: bold;
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-size: 200% auto;
-      animation: shimmer 3s linear infinite, popupIn 1s ease-out forwards;
-    }
-
-    @keyframes shimmer {
-      to {
-        background-position: 200% center;
-      }
     }
 
     @keyframes popupIn {
@@ -152,7 +140,6 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-
       document.getElementById('startButton').addEventListener('click', startGame);
 
       let name = '';
@@ -331,7 +318,7 @@
         document.getElementById('popup-message').innerText = `🎉 HAPPY BIRTHDAY ${name.toUpperCase()}! 🎂`;
         const popup = document.getElementById('popup');
         popup.classList.remove('hidden');
-        popup.style.animation = "popupIn 1s ease-out forwards, shimmer 3s linear infinite";
+        popup.style.animation = "popupIn 1s ease-out forwards";
         showConfetti();
       }
 
