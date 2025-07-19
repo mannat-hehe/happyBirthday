@@ -2,61 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Happy Birthday Princess</title>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      overflow: hidden;
       font-family: 'Fredoka', sans-serif;
-      background: pink;
+      background-color: pink;
+      overflow-x: hidden;
     }
 
-    #start-screen, #popup {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+    #start-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
       text-align: center;
+      color: black;
     }
 
     #start-screen h1 {
-      color: black;
-      font-size: 2em;
+      font-size: 3rem;
       margin-bottom: 20px;
     }
 
-    #start-screen input {
+    #start-screen input, #start-screen button {
       padding: 10px;
-      font-size: 1em;
-      border-radius: 8px;
-      border: none;
-      outline: none;
-      text-align: center;
-    }
-
-    #start-screen button {
-      padding: 10px 20px;
-      font-size: 1em;
-      border: none;
-      background: hotpink;
-      color: white;
+      font-size: 1.2rem;
+      margin: 10px;
       border-radius: 10px;
-      margin-top: 10px;
-      cursor: pointer;
+      border: none;
     }
 
     #game-container {
-      width: 100vw;
-      height: 100vh;
-      position: relative;
       display: none;
+      position: relative;
+      height: 100vh;
+      overflow: hidden;
     }
 
     #kitty {
       position: absolute;
-      bottom: 20px;
+      bottom: 0;
       left: 50px;
       width: 100px;
       transition: left 0.7s;
@@ -64,22 +53,33 @@
 
     .cake {
       position: absolute;
+      bottom: 0;
       width: 60px;
-      bottom: 20px;
       cursor: pointer;
     }
 
     #popup {
       display: none;
-      font-size: 2em;
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 30px;
+      border: 5px solid hotpink;
+      border-radius: 20px;
+      text-align: center;
+      font-size: 2rem;
       color: hotpink;
+      font-weight: bold;
       animation: shimmer 2s infinite;
+      z-index: 999;
     }
 
     @keyframes shimmer {
-      0% { text-shadow: 0 0 5px white; }
+      0% { text-shadow: 0 0 10px hotpink; }
       50% { text-shadow: 0 0 20px deeppink; }
-      100% { text-shadow: 0 0 5px white; }
+      100% { text-shadow: 0 0 10px hotpink; }
     }
 
     .confetti {
@@ -104,7 +104,8 @@
       }
     }
 
-    .heart::before, .heart::after {
+    .heart::before,
+    .heart::after {
       content: "";
       position: absolute;
       width: 10px;
@@ -118,12 +119,24 @@
       background: radial-gradient(circle, hotpink, deeppink);
     }
 
-    .heart::before { top: -8px; left: 0; }
-    .heart::after { left: 8px; top: 0; }
+    .heart::before {
+      top: -8px;
+      left: 0;
+    }
+
+    .heart::after {
+      left: 8px;
+      top: 0;
+    }
 
     .star {
       background: linear-gradient(45deg, gold, yellow, gold);
-      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+      clip-path: polygon(
+        50% 0%, 61% 35%, 98% 35%,
+        68% 57%, 79% 91%, 50% 70%,
+        21% 91%, 32% 57%, 2% 35%,
+        39% 35%
+      );
     }
 
     .spiral {
@@ -135,19 +148,16 @@
 <body>
   <div id="start-screen">
     <h1>HAPPY BIRTHDAY PRINCESS</h1>
-    <input type="text" id="nameInput" placeholder="ENTER YOUR NAME ;)" />
-    <br />
-    <button onclick="startGame()">START</button>
+    <input id="nameInput" placeholder="ENTER YOUR NAME ;)" />
+    <button onclick="startGame()">Start</button>
   </div>
 
   <div id="game-container">
-    <img id="kitty" src="kitty1.png">
+    <img id="kitty" src="kitty1.png" />
     <div id="cake-container"></div>
   </div>
 
-  <div id="popup">
-    HAPPY BIRTHDAY <span id="name"></span>!
-  </div>
+  <div id="popup">🎉 HAPPY BIRTHDAY <span id="name"></span>! 🎂</div>
 
   <audio id="eatSound" src="eat.mp3"></audio>
   <audio id="popupSound" src="popup.mp3"></audio>
@@ -176,12 +186,30 @@
     function spawnCake() {
       if (cakeCount >= totalCakes) return;
 
+      const container = document.getElementById("cake-container");
+      const cakes = document.querySelectorAll(".cake");
+
+      let tries = 0;
+      let x;
+      let tooClose = false;
+
+      do {
+        tooClose = false;
+        x = Math.random() * (window.innerWidth - 60);
+
+        cakes.forEach(cake => {
+          const existingX = parseFloat(cake.style.left);
+          if (Math.abs(existingX - x) < 80) {
+            tooClose = true;
+          }
+        });
+
+        tries++;
+      } while (tooClose && tries < 20);
+
       const cake = document.createElement("img");
       cake.src = "cake.png";
       cake.classList.add("cake");
-
-      const container = document.getElementById("cake-container");
-      const x = Math.random() * (window.innerWidth - 60);
       cake.style.left = `${x}px`;
       container.appendChild(cake);
 
@@ -220,21 +248,22 @@
       }, 700);
     }
 
-    function showPopup() {
-      document.getElementById("popup").style.display = "block";
-      document.getElementById("popupSound").play();
-      confettiHeartsStarsSpirals();
-    }
-
     function startBlinking() {
       const kitty = document.getElementById("kitty");
       blinkInterval = setInterval(() => {
         if (isWalking) return;
+
         kitty.src = "kitty-blink.png";
         setTimeout(() => {
           if (!isWalking) kitty.src = "kitty1.png";
         }, 200);
       }, 4000);
+    }
+
+    function showPopup() {
+      document.getElementById("popup").style.display = "block";
+      document.getElementById("popupSound").play();
+      confettiHeartsStarsSpirals();
     }
 
     function confettiHeartsStarsSpirals() {
@@ -253,6 +282,7 @@
         shape.style.setProperty('--angle', `${Math.random() * 360}deg`);
 
         document.body.appendChild(shape);
+
         setTimeout(() => shape.remove(), 4000);
       };
 
