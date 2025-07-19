@@ -2,98 +2,133 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HAPPY BIRTHDAY PRINCESS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday Princess</title>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      background: pink;
-      font-family: 'Fredoka', sans-serif;
       overflow: hidden;
+      font-family: 'Fredoka', sans-serif;
+      background: pink;
     }
 
-    #start-screen {
+    #start-screen, #popup {
       position: absolute;
-      width: 100%;
-      height: 100%;
-      background: pink;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
     }
 
     #start-screen h1 {
       color: black;
-      font-size: 2rem;
+      font-size: 2em;
+      margin-bottom: 20px;
     }
 
     #start-screen input {
       padding: 10px;
-      font-size: 1rem;
-      text-transform: uppercase;
-      margin-top: 1rem;
+      font-size: 1em;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      text-align: center;
     }
 
     #start-screen button {
       padding: 10px 20px;
-      margin-top: 1rem;
-      font-size: 1rem;
-      background-color: white;
+      font-size: 1em;
       border: none;
+      background: hotpink;
+      color: white;
+      border-radius: 10px;
+      margin-top: 10px;
       cursor: pointer;
     }
 
     #game-container {
-      position: relative;
       width: 100vw;
       height: 100vh;
+      position: relative;
       display: none;
     }
 
     #kitty {
       position: absolute;
-      bottom: 10px;
-      left: 10px;
+      bottom: 20px;
+      left: 50px;
       width: 100px;
-      transition: left 0.5s;
+      transition: left 0.7s;
     }
 
     .cake {
       position: absolute;
       width: 60px;
-      bottom: 10px;
+      bottom: 20px;
+      cursor: pointer;
     }
 
     #popup {
-      position: absolute;
-      top: 30%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: white;
-      padding: 2rem;
-      border-radius: 20px;
-      text-align: center;
       display: none;
-      font-size: 1.5rem;
-    }
-
-    #popup h2 {
+      font-size: 2em;
       color: hotpink;
-      font-size: 2rem;
-      background-image: linear-gradient(45deg, hotpink, deeppink, hotpink);
-      background-size: 200% auto;
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
-      -webkit-text-fill-color: transparent;
-      animation: shimmer 2s infinite linear;
+      animation: shimmer 2s infinite;
     }
 
     @keyframes shimmer {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 200% 50%; }
+      0% { text-shadow: 0 0 5px white; }
+      50% { text-shadow: 0 0 20px deeppink; }
+      100% { text-shadow: 0 0 5px white; }
+    }
+
+    .confetti {
+      position: fixed;
+      width: 20px;
+      height: 20px;
+      top: 0;
+      z-index: 9999;
+      pointer-events: none;
+      animation: fall ease-out forwards;
+      opacity: 0.9;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(var(--angle));
+        opacity: 0;
+      }
+    }
+
+    .heart::before, .heart::after {
+      content: "";
+      position: absolute;
+      width: 10px;
+      height: 16px;
+      background: radial-gradient(circle, hotpink, deeppink);
+      border-radius: 50%;
+    }
+
+    .heart {
+      transform: rotate(-45deg);
+      background: radial-gradient(circle, hotpink, deeppink);
+    }
+
+    .heart::before { top: -8px; left: 0; }
+    .heart::after { left: 8px; top: 0; }
+
+    .star {
+      background: linear-gradient(45deg, gold, yellow, gold);
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    }
+
+    .spiral {
+      background: conic-gradient(from 90deg, violet, purple, magenta);
+      border-radius: 50%;
     }
   </style>
 </head>
@@ -101,6 +136,7 @@
   <div id="start-screen">
     <h1>HAPPY BIRTHDAY PRINCESS</h1>
     <input type="text" id="nameInput" placeholder="ENTER YOUR NAME ;)" />
+    <br />
     <button onclick="startGame()">START</button>
   </div>
 
@@ -110,12 +146,12 @@
   </div>
 
   <div id="popup">
-    <h2>Happy Birthday <span id="name"></span>! 🎉</h2>
+    HAPPY BIRTHDAY <span id="name"></span>!
   </div>
 
   <audio id="eatSound" src="eat.mp3"></audio>
   <audio id="popupSound" src="popup.mp3"></audio>
-  <audio id="walkSound" src="walk.mp3" loop></audio>
+  <audio id="walkSound" src="walk.mp3"></audio>
 
   <script>
     let cakeCount = 0;
@@ -187,14 +223,13 @@
     function showPopup() {
       document.getElementById("popup").style.display = "block";
       document.getElementById("popupSound").play();
-      if (typeof confetti === "function") confetti();
+      confettiHeartsStarsSpirals();
     }
 
     function startBlinking() {
       const kitty = document.getElementById("kitty");
       blinkInterval = setInterval(() => {
         if (isWalking) return;
-
         kitty.src = "kitty-blink.png";
         setTimeout(() => {
           if (!isWalking) kitty.src = "kitty1.png";
@@ -202,38 +237,29 @@
       }, 4000);
     }
 
-    function confetti() {
-      const duration = 2000;
+    function confettiHeartsStarsSpirals() {
+      const shapes = ["heart", "star", "spiral"];
+      const duration = 3000;
       const end = Date.now() + duration;
+
+      const createShape = () => {
+        const shape = document.createElement("div");
+        const type = shapes[Math.floor(Math.random() * shapes.length)];
+        shape.classList.add("confetti", type);
+
+        shape.style.left = `${Math.random() * 100}vw`;
+        shape.style.top = `-20px`;
+        shape.style.animationDuration = `${2 + Math.random() * 2}s`;
+        shape.style.setProperty('--angle', `${Math.random() * 360}deg`);
+
+        document.body.appendChild(shape);
+        setTimeout(() => shape.remove(), 4000);
+      };
 
       (function frame() {
         const timeLeft = end - Date.now();
         if (timeLeft <= 0) return;
-
-        const particle = document.createElement("div");
-        particle.style.position = "fixed";
-        particle.style.width = "10px";
-        particle.style.height = "10px";
-        particle.style.background = `hsl(${Math.random() * 360}, 100%, 70%)`;
-        particle.style.left = Math.random() * 100 + "vw";
-        particle.style.top = "0";
-        particle.style.borderRadius = "50%";
-        particle.style.pointerEvents = "none";
-        particle.style.zIndex = 1000;
-
-        const fallDuration = Math.random() * 2 + 2;
-        particle.style.transition = `top ${fallDuration}s ease-out`;
-
-        document.body.appendChild(particle);
-
-        setTimeout(() => {
-          particle.style.top = "100vh";
-        }, 0);
-
-        setTimeout(() => {
-          particle.remove();
-        }, fallDuration * 1000);
-
+        createShape();
         requestAnimationFrame(frame);
       })();
     }
