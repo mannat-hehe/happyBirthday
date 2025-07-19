@@ -12,81 +12,118 @@
       background-color: #ffe6f0;
       overflow: hidden;
     }
+
     #start-screen {
       text-align: center;
-      padding-top: 100px;
+      margin-top: 100px;
     }
-    #start-screen input,
-    #start-screen button {
-      padding: 10px 20px;
+
+    #start-screen h1 {
+      color: #ff69b4;
       font-size: 20px;
-      border-radius: 20px;
-      border: none;
-      margin-top: 10px;
     }
+
+    #nameInput {
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 20px;
+      width: 250px;
+      text-align: center;
+    }
+
+    #startButton {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
     #game-screen {
-      position: relative;
       width: 100vw;
       height: 100vh;
-      overflow-x: hidden;
-      background-color: #ffe6f0;
+      overflow: hidden;
+      position: relative;
     }
+
     #world {
       position: absolute;
       height: 100%;
-      width: 35000px;
-      left: 0;
-      top: 0;
+      width: 40000px;
+      display: flex;
+      align-items: flex-end;
     }
-    .cloud {
-      position: absolute;
-      background-image: url('clouds.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      opacity: 0.8;
-    }
+
     #ground {
       position: absolute;
       bottom: 0;
-      width: 35000px;
-      height: 60px;
-      background: #ffb6c1;
-      z-index: 0;
-    }
-    #kitty {
-      width: 100px;
       height: 100px;
-      background-image: url('hello_kitty1.png');
-      background-size: cover;
-      position: absolute;
-      left: 50vw;
-      bottom: 60px;
-      transform: translateX(-50%);
-      z-index: 2;
+      width: 100%;
+      background-color: #ffc0cb;
+      z-index: -1;
     }
+
+    #clouds {
+      position: absolute;
+      top: 0;
+      width: 40000px;
+      height: 300px;
+      z-index: 1;
+    }
+
+    .cloud {
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+      opacity: 0.7;
+      box-shadow: 30px 20px 0px white, 60px 10px 0px white, 90px 30px 0px white;
+    }
+
+    #cakes {
+      position: absolute;
+      bottom: 100px;
+      width: 40000px;
+      height: 100px;
+    }
+
     .cake {
+      position: absolute;
+      bottom: 0;
       width: 60px;
       height: 60px;
       background-image: url('cake.png');
       background-size: cover;
-      position: absolute;
-      bottom: 60px;
-      z-index: 1;
+      background-repeat: no-repeat;
     }
+
+    #kitty {
+      position: absolute;
+      bottom: 100px;
+      left: 50%;
+      width: 80px;
+      height: 80px;
+      background-image: url('kitty1.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      transform: translateX(-50%);
+      z-index: 2;
+    }
+
+    #kitty.idle {
+      background-image: url('kitty1.png');
+    }
+
     #popup {
       position: fixed;
       top: 30%;
       left: 50%;
-      transform: translate(-50%, -30%) scale(0.8);
-      background: white;
-      border-radius: 15px;
-      padding: 40px;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
       text-align: center;
-      font-size: 20px;
-      z-index: 999;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-      text-transform: uppercase;
-      animation: popupIn 1s ease-out forwards;
+      z-index: 1000;
+      animation: shimmer 3s linear infinite, popupIn 1s ease-out forwards;
       background: linear-gradient(135deg, #fff0f5, #ffe4e1);
       color: #ff69b4;
       font-weight: bold;
@@ -94,32 +131,34 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-size: 200% auto;
-      animation: shimmer 3s linear infinite, popupIn 1s ease-out forwards;
     }
+
     @keyframes shimmer {
       to {
         background-position: 200% center;
       }
     }
+
     @keyframes popupIn {
-      0% {
+      from {
+        transform: scale(0.5);
         opacity: 0;
-        transform: translate(-50%, -30%) scale(0.5);
       }
-      100% {
+      to {
+        transform: scale(1);
         opacity: 1;
-        transform: translate(-50%, -30%) scale(1);
       }
     }
+
+    @keyframes fall {
+      to {
+        transform: translateY(120vh);
+        opacity: 0;
+      }
+    }
+
     .hidden {
       display: none;
-    }
-    @keyframes blink {
-      0%, 90%, 100% { background-image: url('hello_kitty1.png'); }
-      95% { background-image: url('hello_kitty_blink.png'); }
-    }
-    .idle {
-      animation: blink 4s infinite;
     }
   </style>
 </head>
@@ -130,114 +169,123 @@
     <br>
     <button id="startButton">Start Game</button>
   </div>
+
   <div id="game-screen" style="display: none;">
     <div id="world">
       <div id="ground"></div>
       <div id="clouds"></div>
       <div id="cakes"></div>
     </div>
-    <div id="kitty"></div>
+    <div id="kitty" class="idle"></div>
   </div>
+
   <div id="popup" class="hidden">
     <div id="popup-message"></div>
   </div>
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('startButton').addEventListener('click', startGame);
-      let name = '';
-      let cakesEaten = 0;
       const totalCakes = 20;
-      let kittyWorldX = 17500;
-      let popupShown = false;
-      let walking = false;
-      let world, cloudsContainer, cakesContainer;
-      let cakes = [];
-      let cakeSpawnInterval = null;
-      let cakeMoveInterval = null;
-      let spawnedCakesCount = 0;
       const eatSound = new Audio('eat.mp3');
       const walkSound = new Audio('walk.mp3');
-      walkSound.loop = true;
       const popupSound = new Audio('popup.mp3');
+
+      let name = '', cakesEaten = 0, kittyWorldX = 17500, popupShown = false;
+      let cakes = [], spawnedCakesCount = 0, cakeSpawnInterval = null, cakeMoveInterval = null;
+
+      const kitty = document.getElementById('kitty');
+      const world = document.getElementById('world');
+      const cloudsContainer = document.getElementById('clouds');
+      const cakesContainer = document.getElementById('cakes');
+
+      document.getElementById('startButton').addEventListener('click', startGame);
+
       function startGame() {
         name = document.getElementById('nameInput').value || 'Friend';
         document.getElementById('start-screen').style.display = 'none';
         document.getElementById('game-screen').style.display = 'block';
+
+        // Reset state
         kittyWorldX = 17500;
-        popupShown = false;
         cakesEaten = 0;
-        walking = false;
+        popupShown = false;
         spawnedCakesCount = 0;
-        world = document.getElementById('world');
-        cloudsContainer = document.getElementById('clouds');
-        cakesContainer = document.getElementById('cakes');
-        cloudsContainer.innerHTML = '';
-        cakesContainer.innerHTML = '';
         cakes = [];
-        document.getElementById('kitty').style.backgroundImage = `url('hello_kitty1.png')`;
-        document.getElementById('kitty').classList.add('idle');
+
         setupClouds();
         placeCakes();
         moveCakes();
-        updateWorldPosition();
         setupKeyboard();
+        updateWorldPosition();
+
+        kitty.classList.add('idle');
       }
+
       function setupClouds() {
+        cloudsContainer.innerHTML = '';
         let x = 0;
         while (x < 35000) {
           const cloud = document.createElement('div');
           cloud.classList.add('cloud');
-          const w = 150 + Math.random() * 150;
-          const h = 60 + Math.random() * 60;
-          cloud.style.width = w + 'px';
-          cloud.style.height = h + 'px';
+          cloud.style.width = 150 + Math.random() * 150 + 'px';
+          cloud.style.height = 60 + Math.random() * 60 + 'px';
           cloud.style.top = (50 + Math.random() * 150) + 'px';
           cloud.style.left = x + 'px';
           cloudsContainer.appendChild(cloud);
           x += 200 + Math.random() * 400;
         }
       }
+
       function placeCakes() {
+        cakesContainer.innerHTML = '';
         cakeSpawnInterval = setInterval(() => {
           if (spawnedCakesCount >= totalCakes) {
             clearInterval(cakeSpawnInterval);
             return;
           }
+
           const cake = document.createElement('div');
           cake.classList.add('cake');
-          let spawnX = kittyWorldX + 800 + Math.random() * 800;
+          const spawnX = kittyWorldX + 800 + Math.random() * 800;
           cake.style.left = spawnX + 'px';
           cakesContainer.appendChild(cake);
           cakes.push(cake);
           spawnedCakesCount++;
         }, 1250);
       }
+
       function moveCakes() {
-        cakeMoveInterval = setInterval(() => {
-          checkCollisions();
-        }, 30);
+        cakeMoveInterval = setInterval(checkCollisions, 30);
       }
-      function updateWorldPosition() {
-        world.style.left = (-(kittyWorldX - window.innerWidth / 2)) + 'px';
-      }
+
       function setupKeyboard() {
-        document.addEventListener('keydown', (e) => {
-          if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        document.addEventListener('keydown', e => {
+          if (e.key === 'ArrowLeft') {
+            kittyWorldX -= 20;
+            updateWorldPosition();
             walkSound.currentTime = 0;
             walkSound.play();
-            document.getElementById('kitty').classList.remove('idle');
+            kitty.classList.remove('idle');
+          } else if (e.key === 'ArrowRight') {
+            kittyWorldX += 20;
+            updateWorldPosition();
+            walkSound.currentTime = 0;
+            walkSound.play();
+            kitty.classList.remove('idle');
           }
         });
-        document.addEventListener('keyup', (e) => {
+
+        document.addEventListener('keyup', e => {
           if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-            document.getElementById('kitty').classList.add('idle');
             walkSound.pause();
             walkSound.currentTime = 0;
+            kitty.classList.add('idle');
           }
         });
       }
+
       function checkCollisions() {
-        const kittyRect = document.getElementById('kitty').getBoundingClientRect();
+        const kittyRect = kitty.getBoundingClientRect();
         cakes.forEach((cake, index) => {
           if (!cake) return;
           const cakeRect = cake.getBoundingClientRect();
@@ -252,11 +300,13 @@
           }
         });
       }
+
       function eatCake(cake) {
         cake.remove();
         eatSound.currentTime = 0;
         eatSound.play();
         cakesEaten++;
+
         if (cakesEaten >= totalCakes && !popupShown) {
           popupShown = true;
           clearInterval(cakeSpawnInterval);
@@ -264,15 +314,19 @@
           setTimeout(showPopup, 500);
         }
       }
+
+      function updateWorldPosition() {
+        world.style.left = `-${kittyWorldX - window.innerWidth / 2}px`;
+      }
+
       function showPopup() {
-        popupSound.currentTime = 0;
-        popupSound.play().catch(e => console.log("Popup sound blocked"));
-        document.getElementById('popup-message').innerText = `🎉 HAPPY BIRTHDAY ${name.toUpperCase()}! 🎂`;
+        popupSound.play().catch(e => console.log("Audio autoplay error:", e));
         const popup = document.getElementById('popup');
+        document.getElementById('popup-message').innerText = `🎉 HAPPY BIRTHDAY ${name.toUpperCase()}! 🎂`;
         popup.classList.remove('hidden');
-        popup.style.animation = "popupIn 1s ease-out forwards, shimmer 3s linear infinite";
         showConfetti();
       }
+
       function showConfetti() {
         for (let i = 0; i < 100; i++) {
           const confetti = document.createElement('div');
@@ -284,9 +338,6 @@
           confetti.style.animation = `fall ${2 + Math.random() * 3}s linear forwards`;
           document.body.appendChild(confetti);
         }
-        const style = document.createElement('style');
-        style.innerHTML = `@keyframes fall { to { transform: translateY(120vh); opacity: 0; } }`;
-        document.head.appendChild(style);
       }
     });
   </script>
