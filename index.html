@@ -8,384 +8,91 @@
   <style>
     body {
       margin: 0;
-      font-family: 'Fredoka', sans-serif;
       background-color: #ffe6f0;
+      font-family: 'Fredoka', sans-serif;
       overflow: hidden;
     }
-    #start-screen {
-      text-align: center;
-      padding-top: 100px;
-      font-family: 'Press Start 2P', cursive;
-      color: black;
-    }
-    #start-screen input,
-    #start-screen button {
-      padding: 10px 20px;
-      font-size: 20px;
-      border-radius: 20px;
-      border: none;
-      margin-top: 10px;
-    }
-    #game-screen {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      overflow-x: hidden;
-      background-color: #ffe6f0;
-    }
-    #world {
-      position: absolute;
-      height: 100%;
-      width: 35000px;
-      left: 0;
-      top: 0;
-    }
-    .cloud {
-      position: absolute;
-      background-image: url('clouds.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      opacity: 0.8;
-    }
-    #ground {
-      position: absolute;
-      bottom: 0;
-      width: 35000px;
-      height: 60px;
-      background: #ffb6c1;
-      z-index: 0;
-    }
-    #kitty {
-      width: 100px;
-      height: 100px;
-      background-image: url('hello_kitty1.png');
-      background-size: cover;
-      position: absolute;
-      left: 50vw;
-      bottom: 60px;
-      transform: translateX(-50%);
-      z-index: 2;
-    }
-    .cake {
-      width: 60px;
-      height: 60px;
-      background-image: url('cake.png');
-      background-size: cover;
-      position: absolute;
-      bottom: 60px;
-      z-index: 1;
-    }
+
     #popup {
-      position: fixed;
-      top: 30%;
-      left: 50%;
-      transform: translate(-50%, -30%);
-      background: white;
-      border-radius: 15px;
-      padding: 40px;
-      text-align: center;
-      font-size: 24px;
-      z-index: 999;
-      font-family: 'Press Start 2P', cursive;
-      color: hotpink;
-      animation: shimmer 2s infinite;
-      text-transform: uppercase;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    }
-    @keyframes shimmer {
-      0% { text-shadow: 0 0 5px hotpink; }
-      50% { text-shadow: 0 0 20px deeppink, 0 0 30px hotpink; }
-      100% { text-shadow: 0 0 5px hotpink; }
-    }
-    .hidden {
-      display: none;
-    }
-    video#bgVideo {
       position: fixed;
       top: 50%;
       left: 50%;
-      width: 1280px;
-      height: 720px;
-      object-fit: cover;
       transform: translate(-50%, -50%);
+      background: white;
+      padding: 40px;
+      border-radius: 30px;
+      z-index: 999;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 12px;
+      color: hotpink;
+      text-align: center;
+      animation: shimmer 1.5s infinite alternate;
+    }
+
+    @keyframes shimmer {
+      0% { text-shadow: 0 0 5px #fff; }
+      100% { text-shadow: 0 0 15px #ff69b4, 0 0 20px #ff1493; }
+    }
+
+    #bgVideo {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 750px;
+      height: 1334px;
+      transform: translate(-50%, -50%);
+      object-fit: cover;
       z-index: 998;
       opacity: 0;
       pointer-events: none;
       transition: opacity 1s ease;
     }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <div id="start-screen">
-    <h1>HAPPY BIRTHDAY PRINCESS 🎂</h1>
-    <input type="text" id="nameInput" placeholder="ENTER YOUR NAME ;)" />
-    <br>
-    <button id="startButton">Start Game</button>
-  </div>
 
-  <div id="game-screen" style="display: none;">
-    <div id="world">
-      <div id="ground"></div>
-      <div id="clouds"></div>
-      <div id="cakes"></div>
-    </div>
-    <div id="kitty"></div>
-  </div>
+  <!-- 🎉 Popup -->
+  <div id="popup">HAPPY BIRTHDAY PRINCESS 🎉💕</div>
 
-  <div id="popup" class="hidden">
-    <div id="popup-message"></div>
-  </div>
+  <!-- 🎥 Video -->
+  <video id="bgVideo" muted playsinline preload="auto">
+    <source src="assets/background.mp4" type="video/mp4" />
+  </video>
 
-  <video id="bgVideo" src="background.mp4" muted></video>
+  <!-- 🔊 Audio -->
+  <audio id="popupSound" src="assets/popup.mp3"></audio>
 
+  <!-- 🧠 JS Logic -->
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('startButton').addEventListener('click', startGame);
+    const popup = document.getElementById('popup');
+    const bgVideo = document.getElementById('bgVideo');
+    const popupSound = document.getElementById('popupSound');
 
-      let name = '';
-      let cakesEaten = 0;
-      const totalCakes = 20;
-      let kittyWorldX = 17500;
-      let popupShown = false;
-      let walking = false;
+    popupSound.play();
 
-      let world, cloudsContainer, cakesContainer;
-      let cakes = [];
-      let cakeSpawnInterval = null;
-      let cakeMoveInterval = null;
-      let spawnedCakesCount = 0;
-      let movementInterval = null;
-      let movementDirection = null;
-      let animationInterval = null;
-      let animationFrame = 0;
-      let idleBlinkInterval = null;
-      let lastCakeX = [];
+    popupSound.onended = () => {
+      // Hide popup for full video visibility
+      popup.classList.add('hidden');
 
-      const eatSound = new Audio('eat.mp3');
-      const walkSound = new Audio('walk.mp3');
-      walkSound.loop = true;
-      const popupSound = new Audio('popup.mp3');
-      const bgVideo = document.getElementById('bgVideo');
+      // Play background video
+      bgVideo.style.opacity = '1';
+      bgVideo.play().catch(err => {
+        console.warn('Video autoplay failed:', err);
+      });
+    };
 
-      function startGame() {
-        name = document.getElementById('nameInput').value || 'Friend';
-        document.getElementById('start-screen').style.display = 'none';
-        document.getElementById('game-screen').style.display = 'block';
-
-        kittyWorldX = 17500;
-        popupShown = false;
-        cakesEaten = 0;
-        walking = false;
-        spawnedCakesCount = 0;
-        movementDirection = null;
-        clearInterval(movementInterval);
-        clearInterval(animationInterval);
-        clearInterval(idleBlinkInterval);
-
-        world = document.getElementById('world');
-        cloudsContainer = document.getElementById('clouds');
-        cakesContainer = document.getElementById('cakes');
-
-        cloudsContainer.innerHTML = '';
-        cakesContainer.innerHTML = '';
-        cakes = [];
-        lastCakeX = [];
-
-        document.getElementById('kitty').style.backgroundImage = `url('hello_kitty1.png')`;
-
-        setupClouds();
-        placeCakes();
-        moveCakes();
-        updateWorldPosition();
-        setupKeyboard();
-        setupIdleBlinking();
-      }
-
-      function setupIdleBlinking() {
-        idleBlinkInterval = setInterval(() => {
-          const kitty = document.getElementById('kitty');
-          if (!walking) {
-            kitty.style.backgroundImage = `url('hello_kitty3.png')`;
-            setTimeout(() => {
-              if (!walking) {
-                kitty.style.backgroundImage = `url('hello_kitty1.png')`;
-              }
-            }, 200);
-          }
-        }, 2000);
-      }
-
-      function setupClouds() {
-        let x = 0;
-        while (x < 35000) {
-          const cloud = document.createElement('div');
-          cloud.classList.add('cloud');
-          cloud.style.width = (150 + Math.random() * 150) + 'px';
-          cloud.style.height = (60 + Math.random() * 60) + 'px';
-          cloud.style.top = (50 + Math.random() * 150) + 'px';
-          cloud.style.left = x + 'px';
-          cloudsContainer.appendChild(cloud);
-          x += 200 + Math.random() * 400;
-        }
-      }
-
-      function placeCakes() {
-        cakeSpawnInterval = setInterval(() => {
-          if (spawnedCakesCount >= totalCakes) {
-            clearInterval(cakeSpawnInterval);
-            return;
-          }
-
-          let spawnX;
-          let tries = 0;
-          do {
-            spawnX = kittyWorldX + 400 + Math.random() * 300;
-            tries++;
-          } while (lastCakeX.some(x => Math.abs(x - spawnX) < 100) && tries < 10);
-
-          lastCakeX.push(spawnX);
-
-          const cake = document.createElement('div');
-          cake.classList.add('cake');
-          cake.style.left = spawnX + 'px';
-          cakesContainer.appendChild(cake);
-          cakes.push(cake);
-          spawnedCakesCount++;
-        }, 1250);
-      }
-
-      function moveCakes() {
-        cakeMoveInterval = setInterval(() => {
-          checkCollisions();
-        }, 30);
-      }
-
-      function updateWorldPosition() {
-        world.style.left = (-(kittyWorldX - window.innerWidth / 2)) + 'px';
-      }
-
-      function setupKeyboard() {
-        document.addEventListener('keydown', (e) => {
-          if (movementDirection) return;
-
-          if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-            movementDirection = e.key;
-            if (!walking) {
-              walking = true;
-              walkSound.currentTime = 0;
-              walkSound.play();
-            }
-            clearInterval(idleBlinkInterval);
-            animationFrame = 0;
-            animationInterval = setInterval(() => {
-              animationFrame = (animationFrame + 1) % 2;
-              document.getElementById('kitty').style.backgroundImage = `url('hello_kitty${animationFrame + 1}.png')`;
-            }, 300);
-            movementInterval = setInterval(() => {
-              const step = 10;
-              if (movementDirection === 'ArrowLeft') {
-                kittyWorldX = Math.max(0, kittyWorldX - step);
-              } else if (movementDirection === 'ArrowRight') {
-                kittyWorldX = Math.min(35000, kittyWorldX + step);
-              }
-              updateWorldPosition();
-            }, 30);
-          }
-        });
-
-        document.addEventListener('keyup', (e) => {
-          if (e.key === movementDirection) {
-            clearInterval(movementInterval);
-            movementInterval = null;
-            movementDirection = null;
-            clearInterval(animationInterval);
-            animationInterval = null;
-            document.getElementById('kitty').style.backgroundImage = `url('hello_kitty1.png')`;
-            walking = false;
-            walkSound.pause();
-            walkSound.currentTime = 0;
-            setupIdleBlinking();
-          }
-        });
-      }
-
-      function checkCollisions() {
-        const kittyRect = document.getElementById('kitty').getBoundingClientRect();
-        cakes.forEach((cake, index) => {
-          if (!cake) return;
-          const cakeRect = cake.getBoundingClientRect();
-          if (
-            kittyRect.left < cakeRect.right &&
-            kittyRect.right > cakeRect.left &&
-            kittyRect.bottom > cakeRect.top &&
-            kittyRect.top < cakeRect.bottom
-          ) {
-            eatCake(cake);
-            cakes[index] = null;
-          }
-        });
-      }
-
-      function eatCake(cake) {
-        cake.remove();
-        eatSound.currentTime = 0;
-        eatSound.play();
-        cakesEaten++;
-        if (cakesEaten >= totalCakes && !popupShown) {
-          popupShown = true;
-          clearInterval(cakeSpawnInterval);
-          clearInterval(cakeMoveInterval);
-          setTimeout(showPopup, 500);
-        }
-      }
-
-      function showPopup() {
-        popupSound.currentTime = 0;
-        popupSound.play().catch(e => console.log("Popup sound blocked"));
-        document.getElementById('popup-message').innerText = `🎉 HAPPY BIRTHDAY ${name.toUpperCase()}! 🎂`;
-        document.getElementById('popup').classList.remove('hidden');
-        showConfetti();
-
-        // After popup sound ends, play video and hide popup
-        popupSound.onended = () => {
-          document.getElementById('popup').classList.add('hidden');
-          bgVideo.style.opacity = '1';
-          bgVideo.play();
-        };
-
-        // When video ends, fade it out and show popup again
-        bgVideo.onended = () => {
-          bgVideo.style.opacity = '0';
-          setTimeout(() => {
-            document.getElementById('popup').classList.remove('hidden');
-          }, 1000);
-        };
-      }
-
-      function showConfetti() {
-        const emojis = ['💖', '🎉', '🌀', '⭐', '💕', '✨'];
-        for (let i = 0; i < 100; i++) {
-          const confetti = document.createElement('div');
-          confetti.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-          confetti.style.position = 'fixed';
-          confetti.style.left = Math.random() * 100 + 'vw';
-          confetti.style.top = '-10px';
-          confetti.style.fontSize = '30px';
-          confetti.style.animation = `fall ${2 + Math.random() * 3}s linear forwards`;
-          document.body.appendChild(confetti);
-        }
-        const style = document.createElement('style');
-        style.innerHTML = `
-          @keyframes fall {
-            to {
-              transform: translateY(120vh);
-              opacity: 0;
-            }
-          }
-        `;
-        document.head.appendChild(style);
-      }
-    });
+    // When video ends, fade it out and show popup again
+    bgVideo.onended = () => {
+      bgVideo.style.opacity = '0';
+      setTimeout(() => {
+        popup.classList.remove('hidden');
+      }, 1000);
+    };
   </script>
+
 </body>
 </html>
