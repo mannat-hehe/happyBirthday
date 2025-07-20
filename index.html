@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Happy Birthday Game</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka&family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
@@ -12,10 +12,17 @@
       background-color: #ffe6f0;
       overflow: hidden;
     }
+
+    h1 {
+      font-family: 'Press Start 2P', cursive;
+      color: black;
+    }
+
     #start-screen {
       text-align: center;
       padding-top: 100px;
     }
+
     #start-screen input,
     #start-screen button {
       padding: 10px 20px;
@@ -24,6 +31,7 @@
       border: none;
       margin-top: 10px;
     }
+
     #game-screen {
       position: relative;
       width: 100vw;
@@ -31,6 +39,7 @@
       overflow-x: hidden;
       background-color: #ffe6f0;
     }
+
     #world {
       position: absolute;
       height: 100%;
@@ -38,6 +47,7 @@
       left: 0;
       top: 0;
     }
+
     .cloud {
       position: absolute;
       background-image: url('clouds.png');
@@ -45,6 +55,7 @@
       background-repeat: no-repeat;
       opacity: 0.8;
     }
+
     #ground {
       position: absolute;
       bottom: 0;
@@ -53,6 +64,7 @@
       background: #ffb6c1;
       z-index: 0;
     }
+
     #kitty {
       width: 100px;
       height: 100px;
@@ -64,6 +76,7 @@
       transform: translateX(-50%);
       z-index: 2;
     }
+
     .cake {
       width: 60px;
       height: 60px;
@@ -73,6 +86,7 @@
       bottom: 60px;
       z-index: 1;
     }
+
     #popup {
       position: fixed;
       top: 30%;
@@ -86,7 +100,17 @@
       z-index: 999;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
       text-transform: uppercase;
+      font-family: 'Press Start 2P', cursive;
+      color: hotpink;
+      animation: shimmer 2s infinite;
     }
+
+    @keyframes shimmer {
+      0% { text-shadow: 0 0 5px hotpink; }
+      50% { text-shadow: 0 0 20px deeppink; }
+      100% { text-shadow: 0 0 5px hotpink; }
+    }
+
     .hidden {
       display: none;
     }
@@ -114,7 +138,6 @@
   </div>
 
   <script>
-    // Wait for the DOM
     document.addEventListener('DOMContentLoaded', () => {
 
       document.getElementById('startButton').addEventListener('click', startGame);
@@ -134,6 +157,7 @@
       let movementInterval = null;
       let movementDirection = null;
       let animationInterval = null;
+      let idleBlinkInterval = null;
       let animationFrame = 0;
 
       const eatSound = new Audio('eat.mp3');
@@ -154,6 +178,7 @@
         movementDirection = null;
         clearInterval(movementInterval);
         clearInterval(animationInterval);
+        clearInterval(idleBlinkInterval);
 
         world = document.getElementById('world');
         cloudsContainer = document.getElementById('clouds');
@@ -170,6 +195,7 @@
         moveCakes();
         updateWorldPosition();
         setupKeyboard();
+        startIdleBlink();
       }
 
       function setupClouds() {
@@ -177,16 +203,13 @@
         while (x < 35000) {
           const cloud = document.createElement('div');
           cloud.classList.add('cloud');
-
           const w = 150 + Math.random() * 150;
           const h = 60 + Math.random() * 60;
           cloud.style.width = w + 'px';
           cloud.style.height = h + 'px';
-
           cloud.style.top = (50 + Math.random() * 150) + 'px';
           cloud.style.left = x + 'px';
           cloudsContainer.appendChild(cloud);
-
           x += 200 + Math.random() * 400;
         }
       }
@@ -223,7 +246,7 @@
 
           if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
             movementDirection = e.key;
-
+            clearInterval(idleBlinkInterval);
             if (!walking) {
               walking = true;
               walkSound.currentTime = 0;
@@ -261,6 +284,7 @@
             walking = false;
             walkSound.pause();
             walkSound.currentTime = 0;
+            startIdleBlink();
           }
         });
       }
@@ -304,26 +328,38 @@
       }
 
       function showConfetti() {
+        const confettiShapes = ['🎊', '💖', '🌀'];
         for (let i = 0; i < 100; i++) {
           const confetti = document.createElement('div');
-          confetti.textContent = '🎊';
+          confetti.textContent = confettiShapes[Math.floor(Math.random() * confettiShapes.length)];
           confetti.style.position = 'fixed';
           confetti.style.left = Math.random() * 100 + 'vw';
           confetti.style.top = '-10px';
           confetti.style.fontSize = '30px';
           confetti.style.animation = `fall ${2 + Math.random() * 3}s linear forwards`;
+          confetti.style.zIndex = 999;
           document.body.appendChild(confetti);
         }
+
         const style = document.createElement('style');
         style.innerHTML = `
           @keyframes fall {
             to {
-              transform: translateY(120vh);
+              transform: translateY(120vh) rotate(360deg);
               opacity: 0;
             }
           }
         `;
         document.head.appendChild(style);
+      }
+
+      function startIdleBlink() {
+        idleBlinkInterval = setInterval(() => {
+          document.getElementById('kitty').style.backgroundImage = `url('hello_kitty3.png')`; // blinking image
+          setTimeout(() => {
+            document.getElementById('kitty').style.backgroundImage = `url('hello_kitty1.png')`;
+          }, 200);
+        }, 4000);
       }
     });
   </script>
