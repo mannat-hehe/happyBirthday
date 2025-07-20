@@ -87,6 +87,19 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
       text-transform: uppercase;
     }
+    #popup-message.shimmer {
+      color: hotpink;
+      background: linear-gradient(90deg, #ff69b4, #ff1493, #ff69b4);
+      background-size: 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 2s infinite;
+      white-space: nowrap;
+    }
+    @keyframes shimmer {
+      0% { background-position: 0%; }
+      100% { background-position: 400%; }
+    }
     .hidden {
       display: none;
     }
@@ -110,11 +123,10 @@
   </div>
 
   <div id="popup" class="hidden">
-    <div id="popup-message"></div>
+    <div id="popup-message" class="shimmer"></div>
   </div>
 
   <script>
-    // JavaScript remains unchanged
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('startButton').addEventListener('click', startGame);
 
@@ -303,9 +315,10 @@
       }
 
       function showConfetti() {
+        const confettiOptions = ['💖', '🌀', '🎊'];
         for (let i = 0; i < 100; i++) {
           const confetti = document.createElement('div');
-          confetti.textContent = '🎊';
+          confetti.textContent = confettiOptions[Math.floor(Math.random() * confettiOptions.length)];
           confetti.style.position = 'fixed';
           confetti.style.left = Math.random() * 100 + 'vw';
           confetti.style.top = '-10px';
