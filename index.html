@@ -8,170 +8,173 @@
   <style>
     body {
       margin: 0;
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Press Start 2P', cursive;
       background-color: #ffe6f0;
+      background-image: url('clouds.png');
+      background-size: cover;
       overflow: hidden;
     }
 
-    #video-bg {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-      z-index: -2;
-    }
-
-    #overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(255, 230, 240, 0.4); /* optional pink tint */
-      z-index: -1;
-    }
-
-    #start-screen {
-      text-align: center;
-      padding-top: 100px;
-      font-family: 'Press Start 2P', cursive;
-      color: black;
-    }
-
-    #start-screen input,
-    #start-screen button {
-      padding: 10px 20px;
-      font-size: 20px;
-      border-radius: 20px;
-      border: none;
-      margin-top: 10px;
-    }
-
-    #game-screen {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      overflow-x: hidden;
-    }
-
-    #world {
-      position: absolute;
-      height: 100%;
-      width: 35000px;
-      left: 0;
-      top: 0;
-    }
-
-    .cloud {
-      position: absolute;
-      background-image: url('clouds.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      opacity: 0.8;
-    }
-
-    #ground {
-      position: absolute;
-      bottom: 0;
-      width: 35000px;
-      height: 60px;
-      background: #ffb6c1;
-      z-index: 0;
-    }
-
     #kitty {
-      width: 100px;
-      height: 100px;
-      background-image: url('hello_kitty1.png');
-      background-size: cover;
       position: absolute;
-      left: 50vw;
-      bottom: 60px;
-      transform: translateX(-50%);
-      z-index: 2;
+      width: 100px;
+      transition: transform 0.2s;
     }
 
     .cake {
-      width: 60px;
-      height: 60px;
-      background-image: url('cake.png');
-      background-size: cover;
       position: absolute;
-      bottom: 60px;
-      z-index: 1;
+      width: 50px;
     }
 
     #popup {
       position: fixed;
       top: 30%;
       left: 50%;
-      transform: translate(-50%, -30%);
+      transform: translate(-50%, -50%);
       background: white;
-      border-radius: 15px;
-      padding: 40px;
+      padding: 20px;
+      border-radius: 20px;
       text-align: center;
-      font-size: 24px;
-      z-index: 999;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      font-family: 'Press Start 2P', cursive;
+      display: none;
+      z-index: 10;
+    }
+
+    #popupText {
+      font-size: 18px;
       color: hotpink;
+      text-shadow: 0 0 5px pink, 0 0 10px deeppink;
       animation: shimmer 2s infinite;
-      text-transform: uppercase;
     }
 
     @keyframes shimmer {
-      0% { text-shadow: 0 0 5px hotpink; }
-      50% { text-shadow: 0 0 20px deeppink, 0 0 30px hotpink; }
-      100% { text-shadow: 0 0 5px hotpink; }
+      0% { text-shadow: 0 0 5px pink, 0 0 10px deeppink; }
+      50% { text-shadow: 0 0 20px hotpink, 0 0 30px deeppink; }
+      100% { text-shadow: 0 0 5px pink, 0 0 10px deeppink; }
     }
 
-    .hidden {
+    .confetti {
+      position: fixed;
+      animation: bounceFall 3s ease-in-out forwards;
+      z-index: 10;
+      will-change: transform, opacity;
+    }
+
+    @keyframes bounceFall {
+      0% {
+        transform: translateY(-100px) scale(1);
+        opacity: 1;
+      }
+      30% {
+        transform: translateY(30vh) scale(1.5);
+      }
+      60% {
+        transform: translateY(60vh) scale(1);
+      }
+      100% {
+        transform: translateY(100vh) scale(0.5);
+        opacity: 0;
+      }
+    }
+
+    #birthdayVideo {
       display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90vw;
+      height: auto;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      z-index: 9;
     }
   </style>
 </head>
 <body>
 
-  <!-- 🌸 Video Background -->
-  <video id="video-bg" autoplay muted loop playsinline>
-    <source src="background.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-
-  <!-- Optional Pink Overlay -->
-  <div id="overlay"></div>
-
-  <!-- 🌟 Start Screen -->
-  <div id="start-screen">
-    <h1>HAPPY BIRTHDAY PRINCESS 🎂</h1>
-    <input type="text" id="nameInput" placeholder="ENTER YOUR NAME ;)" />
-    <br>
-    <button id="startButton">Start Game</button>
+  <img id="kitty" src="hello_kitty1.png" alt="Hello Kitty">
+  <div id="popup">
+    <p id="popupText"></p>
   </div>
+  <video id="birthdayVideo" src="background.mp4"></video>
 
-  <!-- 🕹️ Game Screen -->
-  <div id="game-screen" style="display: none;">
-    <div id="world">
-      <div id="ground"></div>
-      <div id="clouds"></div>
-      <div id="cakes"></div>
-    </div>
-    <div id="kitty"></div>
-  </div>
-
-  <!-- 🎉 Popup -->
-  <div id="popup" class="hidden">
-    <div id="popup-message"></div>
-  </div>
-
-  <!-- 🧠 Game Script -->
   <script>
-    // Paste your full JavaScript logic here (unchanged)
-    // ✅ Your original <script> code is already complete and correct
-    // Just make sure it stays exactly as you shared above
-  </script>
+    const kitty = document.getElementById('kitty');
+    let x = 100, y = 100;
+    const step = 10;
+    const screenW = window.innerWidth;
+    const screenH = window.innerHeight;
 
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') x += step;
+      if (e.key === 'ArrowLeft') x -= step;
+      if (e.key === 'ArrowUp') y -= step;
+      if (e.key === 'ArrowDown') y += step;
+      kitty.style.left = x + 'px';
+      kitty.style.top = y + 'px';
+    });
+
+    // Idle blinking
+    let blink = false;
+    setInterval(() => {
+      kitty.src = blink ? 'hello_kitty1.png' : 'hello_kitty3.png';
+      blink = !blink;
+    }, 2000);
+
+    // Confetti emojis
+    const emojis = ['💖', '🎉', '🌀', '⭐', '💕', '✨'];
+
+    function showConfetti() {
+      for (let i = 0; i < 100; i++) {
+        const conf = document.createElement('div');
+        conf.className = 'confetti';
+        conf.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        conf.style.left = Math.random() * 100 + 'vw';
+        conf.style.top = '-5vh';
+        const size = Math.random() * 1.5 + 0.5;
+        conf.style.fontSize = `${size}em`;
+        conf.style.transform = `rotate(${Math.random() * 360}deg)`;
+        document.body.appendChild(conf);
+        setTimeout(() => conf.remove(), 3000);
+      }
+    }
+
+    function showPopup(name) {
+      const popup = document.getElementById('popup');
+      const popupText = document.getElementById('popupText');
+      popupText.textContent = `HAPPY BIRTHDAY ${name.toUpperCase()}! 🎉💕`;
+      popup.style.display = 'block';
+      showConfetti();
+      
+      setTimeout(() => {
+        popup.style.display = 'none';
+        playVideo();
+      }, 1000);
+    }
+
+    function playVideo() {
+      const video = document.getElementById('birthdayVideo');
+      video.style.display = 'block';
+      video.play();
+      video.onended = () => {
+        video.style.transition = 'opacity 1s';
+        video.style.opacity = 0;
+        setTimeout(() => {
+          video.style.display = 'none';
+        }, 1000);
+      }
+    }
+
+    // Simulate cake eating for demo (replace with real logic)
+    let cakesEaten = 0;
+    const name = prompt("ENTER YOUR NAME :)");
+    const cakeTimer = setInterval(() => {
+      cakesEaten++;
+      if (cakesEaten === 20) {
+        clearInterval(cakeTimer);
+        showPopup(name);
+      }
+    }, 300);
+  </script>
 </body>
 </html>
