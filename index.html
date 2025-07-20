@@ -55,18 +55,18 @@
 </head>
 <body>
 
-  <!-- 🎉 Popup -->
-  <div id="popup">HAPPY BIRTHDAY PRINCESS 🎉🍎</div>
+  <!-- 🎉 Birthday Popup -->
+  <div id="popup">HAPPY BIRTHDAY PRINCESS 🎉💕</div>
 
-  <!-- 🎥 Video -->
+  <!-- 🎥 Background Video -->
   <video id="bgVideo" muted playsinline preload="auto">
     <source src="assets/background.mp4" type="video/mp4" />
   </video>
 
-  <!-- 🔊 Audio -->
+  <!-- 🔊 Popup Sound -->
   <audio id="popupSound" src="assets/popup.mp3"></audio>
 
-  <!-- 🧠 JS Logic -->
+  <!-- 🧠 JavaScript -->
   <script>
     const popup = document.getElementById('popup');
     const bgVideo = document.getElementById('bgVideo');
@@ -75,17 +75,17 @@
     popupSound.play();
 
     popupSound.onended = () => {
-      // Hide popup for full video visibility
+      // Hide popup for clear video view
       popup.classList.add('hidden');
 
-      // Play background video
+      // Show and play video
       bgVideo.style.opacity = '1';
       bgVideo.play().catch(err => {
-        console.warn('Video autoplay failed:', err);
+        console.warn('Video play failed:', err);
       });
     };
 
-    // When video ends, fade it out and show popup again
+    // Fade out video and restore popup after video ends
     bgVideo.onended = () => {
       bgVideo.style.opacity = '0';
       setTimeout(() => {
