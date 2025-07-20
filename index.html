@@ -102,11 +102,12 @@
     }
     video#bgVideo {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      top: 50%;
+      left: 50%;
+      width: 1280px;
+      height: 720px;
       object-fit: cover;
+      transform: translate(-50%, -50%);
       z-index: 998;
       opacity: 0;
       pointer-events: none;
@@ -344,12 +345,20 @@
         document.getElementById('popup-message').innerText = `🎉 HAPPY BIRTHDAY ${name.toUpperCase()}! 🎂`;
         document.getElementById('popup').classList.remove('hidden');
         showConfetti();
+
+        // After popup sound ends, play video and hide popup
         popupSound.onended = () => {
+          document.getElementById('popup').classList.add('hidden');
           bgVideo.style.opacity = '1';
           bgVideo.play();
         };
+
+        // When video ends, fade it out and show popup again
         bgVideo.onended = () => {
           bgVideo.style.opacity = '0';
+          setTimeout(() => {
+            document.getElementById('popup').classList.remove('hidden');
+          }, 1000);
         };
       }
 
